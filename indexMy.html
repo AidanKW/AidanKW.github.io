@@ -1,0 +1,339 @@
+<!doctype html>
+
+
+<head>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+    <select id="questionButton"></select>
+    <div id="question"></div>
+    <div id="vixcontainer">
+        <svg style="width:500px;height:500px;border:1px lightgray solid;" />
+    </div>
+    <div id="buttons">
+        <select id="selectButton"></select>
+        <select id="selectButton2"></select>
+    </div>
+
+
+    <div id="datatext"></div>
+    <div id="legend"></div>
+    <p style="font-weight: bold;">Only the first "Total" dropdown menu and its associated legend works. The question selector, and second Country entry do nothing</p>
+    <p> I have chosen to represent missing data points with a -100 value. Keeping the same value as the previous wave would lead to misunderstandings.</p>
+    <p> The colors have no meaning other than to separate additional countries' data.</p>
+</body>
+
+<!-- Is abortion justifiable? 10 yes, 0 no -->
+<!--
+5)  Choose topic (new graph)
+6) 2 lines at once
+7) Dynamic number of lines
+8) Info box
+9) read
+-->
+<!-- Ill need d3.scaleLinear().domain([x,y]).range(["blue", "red]);-->
+<script>
+    var Countries = ["Total",
+            "Argentina",
+            "Australia",
+            "Brazil",
+            "Chile",
+            "China",
+            "Taiwan",
+            "Turkey",
+            "Colombia",
+            "Georgia",
+            "India",
+            "Iraq",
+            "Japan",
+            "Jordan",
+            "South Korea",
+            "Mexico",
+            "Morocco",
+            "New Zealand",
+            "Nigeria",
+            "Pakistan",
+            "Peru",
+            "Philippines",
+            "Poland",
+            "Russia",
+            "Serbia",
+            "South Africa",
+            "Spain",
+            "Slovenia",
+            "Sweden",
+            "Egypt",
+            "Ukraine",
+            "United States",
+            "Uruguay"
+    ];
+    // Adds values into select
+    d3.select("#selectButton")
+        .selectAll("myOptions")
+        .data(Countries)
+        .enter()
+        .append("option")
+        .text(d => d)
+        .attr("value", d => d)
+    // Adds values into second select
+    d3.select("#selectButton2")
+        .selectAll("myOptions")
+        .data(Countries)
+        .enter()
+        .append("option")
+        .text(d => d)
+        .attr("value", d => d)
+
+    qs = ["abortion", "divorce", "euthanasia", "homo", "pbtransport", "prost", "suicide", "taxes"];
+    // Adds values into question 
+    d3.select("#questionButton")
+        .selectAll("myOptions")
+        .data(qs)
+        .enter()
+        .append("option")
+        .text(d => d)
+        .attr("value", d => d)
+
+    // A color scale: one color for each group
+    var myColor = d3.scaleOrdinal()
+        .domain(Countries)
+        .range(d3.schemeSet2);
+
+
+    var question = document.getElementById("questionButton").value;
+    d3.json("data/"+question+".json").then(function (d) {
+        var wave0 = d[0];
+        var wave1 = d[1];
+        var wave2 = d[2];
+        var wave3 = d[3];
+        var name = "Total";
+        var name2 = "Sweden";
+        drawAxis();
+        addLine(name2);
+        //addData(name2);
+        //bar(d, name)
+
+        // Add question 
+        q = getQuestion(question);
+        d3.select("#question").text(q);
+
+
+        function drawAxis() {
+            // Add X axis
+            var x = d3.scaleLinear()
+                .domain([0, 4])
+                .range([0, 500]);
+            //["1995-1999", "2000-2004", "2005-2009", "2010-2014"];
+            d3.select("svg").append("g")
+                .attr("id", "bottomaxis")
+                .attr("transform", "translate(0, 500)")
+                .call(d3.axisTop()
+                    .scale(x)
+                    .ticks(6)
+                    .tickFormat(function (d) {
+                        if (d == 0.5) { return "1995-1999"; }
+                        if (d == 1.5) { return "2000-2004"; }
+                        if (d == 2.5) { return "2005-2009"; }
+                        if (d == 3.5) { return "2010-2014"; }
+                        return null;
+                    }));
+
+            // Add Y axis
+            var y = d3.scaleLinear()
+                .domain([10, 0])
+                .range([0, 500]);
+            d3.select("svg").append("g")
+                .attr("id", "leftaxis")
+                .call(d3.axisRight(y)
+                    .ticks(10)
+                    .tickSize(500))
+                .call(g => g.selectAll(".tick:not(:first-of-type) line")
+                    .attr("stroke-opacity", 0.5)
+                    .attr("stroke-dasharray", "2,2"))
+                .call(g => g.selectAll(".tick text")
+                    .attr("x", 4)
+                    .attr("dy", -4)
+                );
+        };
+
+        // Initialize line with group a
+        var line = d3.select("svg")
+            .append('g')
+            .append("path")
+            .datum(CountryMeans(d, name))
+            .attr("d", d3.line()
+                .x(function (d, i) { return i * 125 + 62.5 })
+                .y(function (d) { return 500 - d * 50 }))
+            .attr("stroke", function (d) { return myColor(name) })
+            .style("stroke-width", 4)
+            .style("fill", "none");
+
+        // Adds another line to the graph
+        function addLine(n) {
+            var line2 = d3.select("svg")
+            .append('g')
+            .append("path")
+            .datum(CountryMeans(d, n))
+            .attr("d", d3.line()
+                .x(function (d, i) { return i * 125 + 62.5 })
+                .y(function (d) { return 500 - d * 50 }))
+            .attr("stroke", function (d) { return myColor(n) })
+            .style("stroke-width", 4)
+            .style("fill", "none");
+        }
+        
+        // Add information about country
+        datatext = formatText(CountryMeans(d, name), name);
+        d3.select("#datatext").text(datatext)
+            .append("svg").attr("width", 10).attr("height", 10).selectAll("rect").data([name]).enter()
+            .append("rect")
+            .attr("id", "TotalLegend")
+            .attr("width", 10)
+            .attr("height", 10)
+            .style("fill", function (d) { return myColor(name) })
+            .attr("x", 0)
+            .attr("y", 0);
+
+            // Add a second entry into value
+            d3.select("#datatext").append("br");
+            // Add information about country
+            datatext = formatText(CountryMeans(d, name2), name2);
+            console.log(datatext);
+            d3.select("#datatext").append("span").text(datatext)
+                .append("svg").attr("width", 10).attr("height", 10).selectAll("rect").data([name2]).enter()
+                .append("rect")
+                .attr("id", name2 +" legend")
+                .attr("width", 10)
+                .attr("height", 10)
+                .style("fill", function (d) { return myColor(name2) })
+                .attr("x", 0)
+                .attr("y", 0);
+            console.log("close");
+
+
+        // A function that update the chart
+        function update(selectedGroup) {
+
+            // Create new data with the selection?
+            var dataFilter = CountryMeans(d, selectedGroup)
+
+            // Give these new data to update line
+            line
+                .datum(dataFilter)
+                .transition()
+                .duration(1000)
+                .attr("d", d3.line()
+                    .x(function (d, i) { return i * 125 + 62.5 })
+                    .y(function (d) { return 500 - d * 50 }))
+                .attr("stroke", function (d) { return myColor(selectedGroup) })
+
+            datatext = formatText(CountryMeans(d, selectedGroup), selectedGroup);
+            d3.select("#datatext").text(datatext)
+                .append("svg").attr("width", 10).attr("height", 10).selectAll("rect").data([selectedGroup]).enter()
+                .append("rect")
+                .attr("id", "TotalLegend")
+                .attr("width", 10)
+                .attr("height", 10)
+                .style("fill", function (d) { return myColor(selectedGroup) })
+                .attr("x", 0)
+                .attr("y", 0);
+        }
+
+        function formatText(array, name) {
+            text = name + "'s  mean values per wave: ";
+            for (i = 0; i < array.length; i++) {
+                text = text + " " + "(" + array[i] + ")"
+            }
+            text = text + "."
+            return text;
+        }
+
+
+
+        // When the button is changed, run the updateChart function
+        d3.select("#selectButton").on("change", function (d) {
+            // recover the option that has been chosen
+            var selectedOption = d3.select(this).property("value")
+            // run the updateChart function with this selected option
+            update(selectedOption)
+        })
+
+    });
+
+    function bar(d, name) {
+        var yScale = d3.scaleLinear().domain([0, 10]).range([0, 100]);
+        d3.select("svg")
+            .selectAll("rect")
+            .data(CountryMeans(d, name))
+            .enter()
+            .append("rect")
+            .attr("id", name + "bar")
+            .attr("width", 10)
+            .attr("height", d => yScale(d))
+            .style("fill", "#FE9922")
+            .style("stroke", "#9A8B7A")
+            .style("stroke-width", "1px")
+            .attr("x", (d, i) => i * 15)
+            .attr("y", d => 100 - yScale(d));
+    }
+
+
+    function printOnPage(d) {
+        d3.select("body").selectAll("div.new")
+            .data(d)
+            .enter()
+            .append("div")
+            .attr("class", "new")
+            .html(d => d);
+    }
+
+    function printWaveMean(waveData) {
+        d3.select("body").selectAll("div.please")
+            .data(waveData)
+            .enter()
+            .append("div")
+            .attr("class", "please")
+            .html(d => [d.country, " " + d.mean]);
+    }
+
+    function CountryMeans(d, name) {
+        ans = [];
+
+        for (i = 0; i < d.length; i++) {
+            wavedata = d[i].data;
+            for (j = 0; j < wavedata.length; j++) {
+                nextCountry = wavedata[j];
+                //console.log("Next Country: " + nextCountry.country);
+                if (nextCountry.country == name) {
+                    //console.log(nextCountry);
+                    ans.push(nextCountry.mean);// + " : " + d[i].start + "-" + d[i].end);
+                    //console.log(ans);
+                }
+            }
+            if (ans.length < i + 1) {
+                ans.push(-100);
+            }
+        }
+
+        return ans;
+    }
+
+    function getQuestion(q) {
+        return "Is " + q + " justifiable? Higher numbers mean more justifiable"
+        if (q == "abortion") {
+            return "Is abortion justifiable? Higher numbers mean more justifiable"
+        }
+        if (q == "divorce") {
+            return "Is divorce justifiable? Higher numbers mean more justifiable."
+        }
+        if (q == "euthanasia") {
+            return "Is divorce euthanasia? Higher numbers mean more justifiable."
+        }
+
+    }
+
+
+
+</script>
+</html>

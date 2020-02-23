@@ -1,0 +1,109 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<title>InfoVis Project2</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+    html, body, h1, h2, h3, h4, h5, h6 {
+        font-family: "Roboto", sans-serif;
+    }
+</style>
+<body>
+
+    <!-- Navbar -->
+    <div class="w3-top">
+        <div class="w3-bar w3-theme w3-top w3-left-align w3-large">
+            <a class="w3-bar-item w3-button w3-right w3-hide-large w3-hover-white w3-large w3-theme-l1" href="javascript:void(0)" onclick="w3_open()"><i class="fa fa-bars"></i></a>
+            <a href="#" class="w3-bar-item w3-button w3-theme-l1">Home</a>
+            <a href="indexLessons.html" class="w3-bar-item w3-button w3-hide-small w3-hover-white">Lessons & Questions</a>
+            <a href="indexSad.html" class="w3-bar-item w3-button w3-hide-small w3-hover-white">Visualization as I wanted it</a>
+            <a href="indexMy.html" class="w3-bar-item w3-button w3-hide-small w3-hover-white">Visualization</a>
+
+        </div>
+    </div>
+
+
+    <!-- Overlay effect when opening sidebar on small screens -->
+    <div class="w3-overlay w3-hide-large" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+
+    <!-- Main content: shift it to the right by 250 pixels when the sidebar is visible -->
+    <div class="w3-twothird" style="margin-left:250px">
+
+        <div class="w3-row w3-padding-64">
+            <div class="w3-main w3-container">
+                <h1 class="w3-text-teal">Aidan Kidder-Wolff</h1>
+                <h1 class="w3-text-teal">Discovery Method 1</h1>
+                <p>
+                    The middle infographic of the homepage (http://www.worldvaluessurvey.org/wvs.jsp) is confusing because both the proposals and the geospatial map uses similar colors to delineate different things.
+                </p>
+                <p class="w3-border w3-padding-large w3-center"><img src="images/wvsFundingProposal.jfif" height="260px" width="180px" alt="Figure 1"></p>
+                <p> I find that having both countries in need of funding and countries in North & Central America as a similar Yellow. <p> The data only has three dimensions: country, funding status, proposal status. What if I want to know which countries need donations the most? Funding status is only [N/A, in progress, and done]. I believe a scale would be more informative. </p>
+                <p class="w3-border w3-padding-large w3-center"><img src="images/fundingScale.png" width="120px" alt="Figure 1"></p>
+                <p>
+                    I would merge the two into a single interactive geospatial visualization.  Give the overview of the globe with funding status’ visible on a scale, and allow zooming and highlighting to see proposal status.
+                </p>
+            </div>
+        </div>
+
+        <div class="w3-row w3-padding-64">
+            <div class="w3-main w3-container">
+                <h1 class="w3-text-teal">Discovery Method 2</h1>
+                <p>It is unclear to me why there is a map here. It is not interactive, and I fail to see how ranges of years relate to this planet.</p>
+                <p class="w3-border w3-center"><img src="images/wvs1.png" height="260px" alt="Figure 1"></p>
+                <p>Selecting a wave brings me to an interface that is designed to imply that selecting a wave was the first step of a process and now I am on the second. Yet, they have changed the entire view and interface. Instead of hoverable buttons and a map, now I am dealing with countries without a map. Also, it is tedious to select countries.</p>
+                <p class="w3-border w3-center"><img src="images/wvs2.png" height="260px" alt="Figure 1"></p>
+                <p>Onto selecting survey questions: I feel there is a lot of wasted space involved. What does “Variable” mean? Is there any ordering?</p>
+                <p class="w3-border w3-padding-large">
+                    <img src="images/wvs3.png" height="260px" style="width: 50%;height: fill;" alt="Figure 1">
+                    <img src="images/wvs4.png" height="260px" style="float:right;width: 50%;height: 260px;" alt="Figure 1">
+                </p>
+                <p>
+                    Hierarchical data ought to have a hierarchical visualization. In the table, question V40 is “Neighbors: Homosexuals.” In the tree, Homosexuals falls under “Would not like to have as Neighbors”. Why is this the backup? Why change the interface again? Now I click “Show” in the table or the title of a question in the tree instead of a button. 
+                </p>
+                <p class="w3-border w3-padding-large">
+                    <img src="images/wvs5.png" height="350px" style="width: 50%;height: fill;" alt="Figure 1">
+                    <img src="images/wvs6.png" height="350px" style="float:right;width: 50%;" alt="Figure 1">
+                </p>
+                <p>
+                    “Mentioned” or “Not Mentioned” means nothing. I’d expect to see these countries opinions on homosexual neighbors.  I don’t know what "Cross by" means or where the fields came from.  
+                </p>
+                <p>The bar graph icon leads the user to several different visualizations that help a lot. It took a surprising number of clicks and pages to get to this point though. I’d love to see an interface that integrates all these tabs into one screen.<p></p><p></p><p></p>
+            </div>
+
+        </div>
+
+
+        <!-- END MAIN -->
+    </div>
+
+    <script>
+        // Get the Sidebar
+        var mySidebar = document.getElementById("mySidebar");
+
+        // Get the DIV with overlay effect
+        var overlayBg = document.getElementById("myOverlay");
+
+        // Toggle between showing and hiding the sidebar, and add overlay effect
+        function w3_open() {
+            if (mySidebar.style.display === 'block') {
+                mySidebar.style.display = 'none';
+                overlayBg.style.display = "none";
+            } else {
+                mySidebar.style.display = 'block';
+                overlayBg.style.display = "block";
+            }
+        }
+
+        // Close the sidebar with the close button
+        function w3_close() {
+            mySidebar.style.display = "none";
+            overlayBg.style.display = "none";
+        }
+    </script>
+
+</body>
+</html>
